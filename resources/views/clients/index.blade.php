@@ -35,6 +35,13 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer bg-white py-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0" id="paginationContainer">
+                </ul>
+            </nav>
+        </div>
+    </div>
     </div>
 
     @vite('resources/js/clients.js')

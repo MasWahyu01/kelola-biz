@@ -2,10 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
     const tableBody = document.getElementById('clientTableBody');
 
-    // Fungsi Fetch Data Klien
-    async function fetchClients() {
+    // --- FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination) ---
+    async function fetchClients(url = '/api/clients') {
         try {
-            const response = await fetch('/api/clients', {
+            // Tampilkan loading saat pindah halaman
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -15,8 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Gagal mengambil data');
 
-            const data = await response.json();
-            renderTable(data.data); // Laravel pagination membungkus data dalam properti .data
+            const result = await response.json();
+            
+            // Laravel Paginate mengembalikan structure: { data: [...], links: {...}, meta: {...} }
+            // Kita render baris tabel
+            renderTable(result.data);
+            
+            // Kita render tombol navigasi halaman
+            renderPagination(result); 
 
         } catch (error) {
             console.error('Error:', error);
@@ -24,11 +33,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fungsi Render Tabel
+    // --- FUNGSI RENDER PAGINATION (BARU) ---
+    function renderPagination(result) {
+        const container = document.getElementById('paginationContainer');
+        
+        // Pastikan container pagination ada di HTML kamu sebelum diisi
+        if (!container) return; 
+
+        container.innerHTML = '';
+
+        // Tombol Previous
+        const prevDisabled = result.prev_page_url ? '' : 'disabled';
+        const prevBtn = `
+            <li class="page-item ${prevDisabled}">
+                <button class="page-link" onclick="window.loadPage('${result.prev_page_url}')" ${prevDisabled}>Previous</button>
+            </li>
+        `;
+
+        // Info Halaman (Contoh: "Page 1 of 5")
+        // Catatan: result.last_page kadang null jika data sedikit, kita handle safe check
+        const lastPage = result.last_page || 1; 
+        const info = `
+            <li class="page-item disabled">
+                <span class="page-link text-dark">Page ${result.current_page} of ${lastPage}</span>
+            </li>
+        `;
+
+        // Tombol Next
+        const nextDisabled = result.next_page_url ? '' : 'disabled';
+        const nextBtn = `
+            <li class="page-item ${nextDisabled}">
+                <button class="page-link" onclick="window.loadPage('${result.next_page_url}')" ${nextDisabled}>Next</button>
+            </li>
+        `;
+
+        container.innerHTML = prevBtn + info + nextBtn;
+    }
+
+    // --- HELPER GLOBAL (Agar bisa dipanggil via onclick HTML) ---
+    window.loadPage = (url) => {
+        if (url && url !== 'null') {
+            fetchClients(url);
+        }
+    };
+
+    // --- FUNGSI RENDER TABEL ---
     function renderTable(clients) {
         tableBody.innerHTML = '';
         
-        if (clients.length === 0) {
+        if (!clients || clients.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Belum ada data klien.</td></tr>`;
             return;
         }
@@ -94,21 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 4. Sukses: Tutup Modal, Reset Form, Refresh Tabel
                     createForm.reset();
                     
-                    // --- PERUBAHAN: Cara menutup modal yang lebih aman ---
-                    // Kita cari tombol "X" (close) di dalam modal, lalu kita klik secara programatis
                     const closeBtn = document.querySelector('#createClientModal .btn-close');
                     if (closeBtn) closeBtn.click();
-                    // ----------------------------------------------------
 
-                    // Refresh tabel
+                    // Refresh tabel (kembali ke halaman 1 atau refresh data)
                     fetchClients();
                     
-                    // Opsional: Ganti alert standar dengan SweetAlert nanti jika mau, 
-                    // tapi alert bawaan browser cukup untuk debug.
                     alert('Klien berhasil ditambahkan!'); 
                 } else {
-                    // 5. Gagal Validasi: Tampilkan Error
-                    // Jika error validasi Laravel (422)
+                    // 5. Gagal Validasi
                     if (result.message) {
                         formAlert.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
                     }
@@ -125,6 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Jalankan saat halaman dimuat
+    // Jalankan saat halaman dimuat (Load halaman 1)
     fetchClients();
 });
