@@ -30,7 +30,8 @@
                 <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
                     Manajemen Klien
                 </a>
-                <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
+                <a href="/services"
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
                     Service Tracking
                 </a>
                 <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
