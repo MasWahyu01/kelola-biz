@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
     const tableBody = document.getElementById('clientTableBody');
-    const searchInput = document.getElementById('searchInput'); // Ambil elemen input search
+    const searchInput = document.getElementById('searchInput');
 
-    // --- 1. FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination & Search) ---
+    // --- 1. FUNGSI FETCH DATA KLIEN (Support Pagination & Search) ---
     async function fetchClients(url = '/api/clients') {
         const search = searchInput ? searchInput.value : '';
         const urlObj = new URL(url, window.location.origin);
@@ -185,16 +185,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // A. Variabel UI Modal Edit
     const editForm = document.getElementById('editClientForm');
     const editModalEl = document.getElementById('editClientModal');
-    // Pastikan Bootstrap script sudah di-load di HTML agar baris ini bekerja
-    const editModal = new bootstrap.Modal(editModalEl); 
+    // Pastikan Bootstrap JS sudah di-load agar baris ini bekerja
+    // Jika error "bootstrap is not defined", pastikan script bootstrap ada di file blade/html utama
+    const editModal = (typeof bootstrap !== 'undefined') 
+        ? new bootstrap.Modal(editModalEl) 
+        : null; 
 
-    // B. Helper: Buka Modal & Isi Data (Dipanggil dari tombol pensil di tabel)
+    // B. Helper: Buka Modal & Isi Data
     window.openEditModal = async (id) => {
+        if (!editModal) {
+            alert("Bootstrap JS belum dimuat dengan benar.");
+            return;
+        }
+
         try {
-            // Reset form
             editForm.reset();
             
-            // Ambil data terbaru dari server (GET /api/clients/{id})
             const response = await fetch(`/api/clients/${id}`, {
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -205,9 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Gagal mengambil data');
             
             const result = await response.json();
-            const client = result.data || result; // Handle jika response dibungkus wrapper data atau tidak
+            const client = result.data || result;
 
-            // Isi Form dengan data yang diterima
             document.getElementById('editClientId').value = client.id;
             document.getElementById('editName').value = client.name;
             document.getElementById('editEmail').value = client.email;
@@ -215,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('editType').value = client.type;
             document.getElementById('editStatus').value = client.status;
 
-            // Tampilkan Modal
             editModal.show();
 
         } catch (error) {
@@ -233,21 +237,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('updateBtn');
             const alertBox = document.getElementById('editFormAlertContainer');
             
-            // UI Loading
             btn.disabled = true;
             btn.innerHTML = 'Menyimpan...';
             if(alertBox) alertBox.innerHTML = '';
 
-            // Ambil data form
             const formData = new FormData(editForm);
             const data = Object.fromEntries(formData.entries());
-            
-            // Method Spoofing untuk Laravel (PUT via POST)
             data._method = 'PUT'; 
 
             try {
                 const response = await fetch(`/api/clients/${id}`, {
-                    method: 'POST', // Gunakan POST karena ada _method=PUT
+                    method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     editModal.hide();
-                    fetchClients(); // Refresh tabel agar data di tabel berubah
+                    fetchClients();
                     alert('Data berhasil diperbarui!');
                 } else {
                     if (result.message && alertBox) {
@@ -280,7 +280,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 9. FUNGSI HAPUS KLIEN (DELETE) ---
+    // (Kode baru ditambahkan di sini)
+    window.deleteClient = async (id) => {
+        if (!confirm('Apakah Anda yakin ingin menghapus data klien ini? Tindakan ini tidak bisa dibatalkan.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/clients/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Data berhasil dihapus.');
+                fetchClients(); // Refresh tabel
+            } else {
+                alert(result.message || 'Gagal menghapus data.');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan sistem saat menghapus data.');
+        }
+    };
+
     // --- 8. EXECUTE PERTAMA KALI ---
-    // Jalankan fetch saat halaman selesai dimuat
     fetchClients();
 });
