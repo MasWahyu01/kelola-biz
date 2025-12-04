@@ -3,23 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('clientTableBody');
     const searchInput = document.getElementById('searchInput'); // Ambil elemen input search
 
-    // --- FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination & Search) ---
+    // --- 1. FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination & Search) ---
     async function fetchClients(url = '/api/clients') {
-        // 1. Ambil kata kunci pencarian
         const search = searchInput ? searchInput.value : '';
-
-        // 2. Manipulasi URL untuk menyertakan search query
-        // Kita gunakan URL object agar aman menggabungkan parameter page & search
         const urlObj = new URL(url, window.location.origin);
         
         if (search) {
-            // Jika ada pencarian, tambahkan ?search=... ke URL
             urlObj.searchParams.set('search', search);
         }
 
         try {
-            // Tampilkan loading saat proses fetch
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
             const response = await fetch(urlObj.toString(), {
                 method: 'GET',
@@ -33,44 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             
-            // Render baris tabel
             renderTable(result.data);
-            
-            // Render tombol navigasi halaman
             renderPagination(result); 
 
         } catch (error) {
             console.error('Error:', error);
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Pastikan Anda login.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Gagal memuat data. Pastikan Anda login.</td></tr>`;
         }
     }
 
-    // --- LOGIKA PENCARIAN (DEBOUNCE) ---
-    // Agar tidak request ke server setiap kali satu huruf diketik
+    // --- 2. LOGIKA PENCARIAN (DEBOUNCE) ---
     let timeout = null;
-    
     if (searchInput) {
         searchInput.addEventListener('input', () => {
-            // Hapus timer sebelumnya jika user masih mengetik
             clearTimeout(timeout);
-            
-            // Tunggu 500ms setelah user berhenti mengetik, baru cari
             timeout = setTimeout(() => {
-                // Reset ke halaman 1 (/api/clients) dengan kata kunci baru
                 fetchClients('/api/clients'); 
             }, 500);
         });
     }
 
-    // --- FUNGSI RENDER PAGINATION ---
+    // --- 3. FUNGSI RENDER PAGINATION ---
     function renderPagination(result) {
         const container = document.getElementById('paginationContainer');
-        
         if (!container) return; 
 
         container.innerHTML = '';
 
-        // Tombol Previous
         const prevDisabled = result.prev_page_url ? '' : 'disabled';
         const prevBtn = `
             <li class="page-item ${prevDisabled}">
@@ -78,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </li>
         `;
 
-        // Info Halaman
         const lastPage = result.last_page || 1; 
         const info = `
             <li class="page-item disabled">
@@ -86,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </li>
         `;
 
-        // Tombol Next
         const nextDisabled = result.next_page_url ? '' : 'disabled';
         const nextBtn = `
             <li class="page-item ${nextDisabled}">
@@ -97,56 +78,56 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = prevBtn + info + nextBtn;
     }
 
-    // --- HELPER GLOBAL ---
+    // --- 4. HELPER GLOBAL (Load Page) ---
     window.loadPage = (url) => {
         if (url && url !== 'null') {
             fetchClients(url);
         }
     };
 
-    // --- FUNGSI RENDER TABEL ---
+    // --- 5. FUNGSI RENDER TABEL ---
     function renderTable(clients) {
         tableBody.innerHTML = '';
         
         if (!clients || clients.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Data tidak ditemukan.</td></tr>`;
             return;
         }
 
         clients.forEach((client, index) => {
-const row = `
-            <tr>
-                <td>${index + 1}</td>
-                <td>
-                    <div class="fw-bold">${client.name}</div>
-                    <small class="text-muted">${client.email}</small>
-                </td>
-                <td>${client.phone || '-'}</td>
-                <td>
-                    <span class="badge bg-${client.type === 'VIP' ? 'warning' : 'info'}">
-                        ${client.type}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge bg-${client.status === 'active' ? 'success' : 'secondary'}">
-                        ${client.status}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditModal(${client.id})">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="window.deleteClient(${client.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
+            const row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="fw-bold">${client.name}</div>
+                        <small class="text-muted">${client.email}</small>
+                    </td>
+                    <td>${client.phone || '-'}</td>
+                    <td>
+                        <span class="badge bg-${client.type === 'VIP' ? 'warning' : 'info'}">
+                            ${client.type}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${client.status === 'active' ? 'success' : 'secondary'}">
+                            ${client.status}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditModal(${client.id})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteClient(${client.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
     }
 
-    // --- LOGIKA TAMBAH KLIEN ---
+    // --- 6. LOGIKA TAMBAH KLIEN (CREATE) ---
     const createForm = document.getElementById('createClientForm');
     const formAlert = document.getElementById('formAlertContainer');
     const saveBtn = document.getElementById('saveBtn');
@@ -181,9 +162,7 @@ const row = `
                     const closeBtn = document.querySelector('#createClientModal .btn-close');
                     if (closeBtn) closeBtn.click();
 
-                    // Refresh tabel (pencarian juga akan terbawa jika ada input text)
-                    fetchClients();
-                    
+                    fetchClients(); // Refresh tabel
                     alert('Klien berhasil ditambahkan!'); 
                 } else {
                     if (result.message) {
@@ -201,6 +180,107 @@ const row = `
         });
     }
 
-    // Jalankan fetch pertama kali saat halaman dimuat
+    // --- 7. LOGIKA EDIT KLIEN (UPDATE) ---
+    
+    // A. Variabel UI Modal Edit
+    const editForm = document.getElementById('editClientForm');
+    const editModalEl = document.getElementById('editClientModal');
+    // Pastikan Bootstrap script sudah di-load di HTML agar baris ini bekerja
+    const editModal = new bootstrap.Modal(editModalEl); 
+
+    // B. Helper: Buka Modal & Isi Data (Dipanggil dari tombol pensil di tabel)
+    window.openEditModal = async (id) => {
+        try {
+            // Reset form
+            editForm.reset();
+            
+            // Ambil data terbaru dari server (GET /api/clients/{id})
+            const response = await fetch(`/api/clients/${id}`, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Gagal mengambil data');
+            
+            const result = await response.json();
+            const client = result.data || result; // Handle jika response dibungkus wrapper data atau tidak
+
+            // Isi Form dengan data yang diterima
+            document.getElementById('editClientId').value = client.id;
+            document.getElementById('editName').value = client.name;
+            document.getElementById('editEmail').value = client.email;
+            document.getElementById('editPhone').value = client.phone || '';
+            document.getElementById('editType').value = client.type;
+            document.getElementById('editStatus').value = client.status;
+
+            // Tampilkan Modal
+            editModal.show();
+
+        } catch (error) {
+            console.error(error);
+            alert('Gagal memuat data klien. Cek koneksi atau token.');
+        }
+    };
+
+    // C. Listener: Simpan Perubahan (Update)
+    if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('editClientId').value;
+            const btn = document.getElementById('updateBtn');
+            const alertBox = document.getElementById('editFormAlertContainer');
+            
+            // UI Loading
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+            if(alertBox) alertBox.innerHTML = '';
+
+            // Ambil data form
+            const formData = new FormData(editForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Method Spoofing untuk Laravel (PUT via POST)
+            data._method = 'PUT'; 
+
+            try {
+                const response = await fetch(`/api/clients/${id}`, {
+                    method: 'POST', // Gunakan POST karena ada _method=PUT
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    editModal.hide();
+                    fetchClients(); // Refresh tabel agar data di tabel berubah
+                    alert('Data berhasil diperbarui!');
+                } else {
+                    if (result.message && alertBox) {
+                        alertBox.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
+                    } else {
+                        alert('Gagal update data.');
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan sistem saat update.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Update Perubahan';
+            }
+        });
+    }
+
+    // --- 8. EXECUTE PERTAMA KALI ---
+    // Jalankan fetch saat halaman selesai dimuat
     fetchClients();
 });
