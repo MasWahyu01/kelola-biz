@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formAlert = document.getElementById('formAlertContainer');
     const saveBtn = document.getElementById('saveBtn');
 
-    if (createForm) { // Pastikan elemen ada sebelum menambah event listener
+    if (createForm) { 
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -93,14 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     // 4. Sukses: Tutup Modal, Reset Form, Refresh Tabel
                     createForm.reset();
-                    // Tutup modal bootstrap secara programatis
-                    const modalEl = document.getElementById('createClientModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
+                    
+                    // --- PERUBAHAN: Cara menutup modal yang lebih aman ---
+                    // Kita cari tombol "X" (close) di dalam modal, lalu kita klik secara programatis
+                    const closeBtn = document.querySelector('#createClientModal .btn-close');
+                    if (closeBtn) closeBtn.click();
+                    // ----------------------------------------------------
 
                     // Refresh tabel
                     fetchClients();
-                    alert('Klien berhasil ditambahkan!');
+                    
+                    // Opsional: Ganti alert standar dengan SweetAlert nanti jika mau, 
+                    // tapi alert bawaan browser cukup untuk debug.
+                    alert('Klien berhasil ditambahkan!'); 
                 } else {
                     // 5. Gagal Validasi: Tampilkan Error
                     // Jika error validasi Laravel (422)
