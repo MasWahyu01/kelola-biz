@@ -58,6 +58,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- LOGIKA TAMBAH KLIEN ---
+    const createForm = document.getElementById('createClientForm');
+    const formAlert = document.getElementById('formAlertContainer');
+    const saveBtn = document.getElementById('saveBtn');
+
+    if (createForm) { // Pastikan elemen ada sebelum menambah event listener
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 1. UI Loading State
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = 'Menyimpan...';
+            formAlert.innerHTML = '';
+
+            // 2. Ambil Data Form
+            const formData = new FormData(createForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // 3. Kirim ke API
+                const response = await fetch('/api/clients', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 4. Sukses: Tutup Modal, Reset Form, Refresh Tabel
+                    createForm.reset();
+                    // Tutup modal bootstrap secara programatis
+                    const modalEl = document.getElementById('createClientModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+
+                    // Refresh tabel
+                    fetchClients();
+                    alert('Klien berhasil ditambahkan!');
+                } else {
+                    // 5. Gagal Validasi: Tampilkan Error
+                    // Jika error validasi Laravel (422)
+                    if (result.message) {
+                        formAlert.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                formAlert.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan sistem.</div>`;
+            } finally {
+                // 6. Reset Tombol
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Simpan';
+            }
+        });
+    }
+
     // Jalankan saat halaman dimuat
     fetchClients();
 });
