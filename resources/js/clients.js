@@ -114,28 +114,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         clients.forEach((client, index) => {
-            const row = `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>
-                        <div class="fw-bold">${client.name}</div>
-                        <small class="text-muted">${client.email}</small>
-                    </td>
-                    <td>${client.phone || '-'}</td>
-                    <td>
-                        <span class="badge bg-${client.type === 'VIP' ? 'warning' : 'info'}">
-                            ${client.type}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge bg-${client.status === 'active' ? 'success' : 'secondary'}">
-                            ${client.status}
-                        </span>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
+const row = `
+            <tr>
+                <td>${index + 1}</td>
+                <td>
+                    <div class="fw-bold">${client.name}</div>
+                    <small class="text-muted">${client.email}</small>
+                </td>
+                <td>${client.phone || '-'}</td>
+                <td>
+                    <span class="badge bg-${client.type === 'VIP' ? 'warning' : 'info'}">
+                        ${client.type}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-${client.status === 'active' ? 'success' : 'secondary'}">
+                        ${client.status}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditModal(${client.id})">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="window.deleteClient(${client.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
     }
 
     // --- LOGIKA TAMBAH KLIEN ---
