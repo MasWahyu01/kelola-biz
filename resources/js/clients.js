@@ -1,14 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
     const tableBody = document.getElementById('clientTableBody');
+    const searchInput = document.getElementById('searchInput'); // Ambil elemen input search
 
-    // --- FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination) ---
+    // --- FUNGSI FETCH DATA KLIEN (UPDATE: Support Pagination & Search) ---
     async function fetchClients(url = '/api/clients') {
+        // 1. Ambil kata kunci pencarian
+        const search = searchInput ? searchInput.value : '';
+
+        // 2. Manipulasi URL untuk menyertakan search query
+        // Kita gunakan URL object agar aman menggabungkan parameter page & search
+        const urlObj = new URL(url, window.location.origin);
+        
+        if (search) {
+            // Jika ada pencarian, tambahkan ?search=... ke URL
+            urlObj.searchParams.set('search', search);
+        }
+
         try {
-            // Tampilkan loading saat pindah halaman
+            // Tampilkan loading saat proses fetch
             tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
-            const response = await fetch(url, {
+            const response = await fetch(urlObj.toString(), {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -20,11 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             
-            // Laravel Paginate mengembalikan structure: { data: [...], links: {...}, meta: {...} }
-            // Kita render baris tabel
+            // Render baris tabel
             renderTable(result.data);
             
-            // Kita render tombol navigasi halaman
+            // Render tombol navigasi halaman
             renderPagination(result); 
 
         } catch (error) {
@@ -33,11 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- FUNGSI RENDER PAGINATION (BARU) ---
+    // --- LOGIKA PENCARIAN (DEBOUNCE) ---
+    // Agar tidak request ke server setiap kali satu huruf diketik
+    let timeout = null;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            // Hapus timer sebelumnya jika user masih mengetik
+            clearTimeout(timeout);
+            
+            // Tunggu 500ms setelah user berhenti mengetik, baru cari
+            timeout = setTimeout(() => {
+                // Reset ke halaman 1 (/api/clients) dengan kata kunci baru
+                fetchClients('/api/clients'); 
+            }, 500);
+        });
+    }
+
+    // --- FUNGSI RENDER PAGINATION ---
     function renderPagination(result) {
         const container = document.getElementById('paginationContainer');
         
-        // Pastikan container pagination ada di HTML kamu sebelum diisi
         if (!container) return; 
 
         container.innerHTML = '';
@@ -50,8 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </li>
         `;
 
-        // Info Halaman (Contoh: "Page 1 of 5")
-        // Catatan: result.last_page kadang null jika data sedikit, kita handle safe check
+        // Info Halaman
         const lastPage = result.last_page || 1; 
         const info = `
             <li class="page-item disabled">
@@ -70,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = prevBtn + info + nextBtn;
     }
 
-    // --- HELPER GLOBAL (Agar bisa dipanggil via onclick HTML) ---
+    // --- HELPER GLOBAL ---
     window.loadPage = (url) => {
         if (url && url !== 'null') {
             fetchClients(url);
@@ -82,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = '';
         
         if (!clients || clients.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Belum ada data klien.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>`;
             return;
         }
 
@@ -120,17 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // 1. UI Loading State
             saveBtn.disabled = true;
             saveBtn.innerHTML = 'Menyimpan...';
             formAlert.innerHTML = '';
 
-            // 2. Ambil Data Form
             const formData = new FormData(createForm);
             const data = Object.fromEntries(formData.entries());
 
             try {
-                // 3. Kirim ke API
                 const response = await fetch('/api/clients', {
                     method: 'POST',
                     headers: {
@@ -144,18 +168,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok) {
-                    // 4. Sukses: Tutup Modal, Reset Form, Refresh Tabel
                     createForm.reset();
                     
                     const closeBtn = document.querySelector('#createClientModal .btn-close');
                     if (closeBtn) closeBtn.click();
 
-                    // Refresh tabel (kembali ke halaman 1 atau refresh data)
+                    // Refresh tabel (pencarian juga akan terbawa jika ada input text)
                     fetchClients();
                     
                     alert('Klien berhasil ditambahkan!'); 
                 } else {
-                    // 5. Gagal Validasi
                     if (result.message) {
                         formAlert.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
                     }
@@ -165,13 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(error);
                 formAlert.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan sistem.</div>`;
             } finally {
-                // 6. Reset Tombol
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = 'Simpan';
             }
         });
     }
 
-    // Jalankan saat halaman dimuat (Load halaman 1)
+    // Jalankan fetch pertama kali saat halaman dimuat
     fetchClients();
 });

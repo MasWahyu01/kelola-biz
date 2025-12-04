@@ -4,12 +4,25 @@
 
 @section('content')
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="m-0 fw-bold text-primary">Daftar Klien</h5>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createClientModal">
-                <i class="bi bi-plus-lg"></i> Tambah Klien
-            </button>
+
+            <div class="d-flex gap-2">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
+                        placeholder="Cari nama atau email...">
+                </div>
+
+                <button class="btn btn-primary btn-sm text-nowrap" data-bs-toggle="modal"
+                    data-bs-target="#createClientModal">
+                    <i class="bi bi-plus-lg"></i> Tambah Klien
+                </button>
+            </div>
         </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -46,7 +59,6 @@
 
     @vite('resources/js/clients.js')
 
-    <!-- Modal Tambah Klien -->
     <div class="modal fade" id="createClientModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">

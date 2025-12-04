@@ -9,12 +9,25 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     /**
-     * Tampilkan semua data klien (dengan pagination).
+     * Tampilkan semua data klien (dengan pagination dan filter pencarian).
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil data terbaru, 10 per halaman
-        $clients = Client::latest()->paginate(10);
+        $query = Client::latest();
+
+        // Jika ada parameter pencarian (misal: /api/clients?search=budi)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Tetap gunakan pagination (10 per halaman)
+        // Hasil pencarian akan otomatis ter-paginate juga
+        $clients = $query->paginate(10);
+        
         return response()->json($clients);
     }
 
