@@ -24,18 +24,22 @@
             </div>
             <div class="list-group list-group-flush p-2">
                 <a href="/dashboard"
-                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 active">
-                    Dashboard
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 {{ request()->is('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
                 </a>
-                <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
-                    Manajemen Klien
+
+                <a href="/clients"
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 {{ request()->is('clients*') ? 'active' : '' }}">
+                    <i class="bi bi-people me-2"></i> Manajemen Klien
                 </a>
+
                 <a href="/services"
-                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
-                    Service Tracking
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 {{ request()->is('services*') ? 'active' : '' }}">
+                    <i class="bi bi-tools me-2"></i> Service Tracking
                 </a>
+
                 <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
-                    Interaction Logs
+                    <i class="bi bi-journal-text me-2"></i> Interaction Logs
                 </a>
             </div>
         </div>
