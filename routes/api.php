@@ -3,7 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ClientController; // Import Controller Klien
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ServiceController;
 
 // Route untuk Login (Public / Tanpa Token)
 Route::post('login', [AuthController::class, 'login']);
@@ -18,5 +19,5 @@ Route::middleware('auth:api')->group(function () {
 
     // Route API Resource Klien (Otomatis membuat url index, store, update, destroy)
     Route::apiResource('clients', ClientController::class);
-    
+    Route::apiResource('services', ServiceController::class);
 });
