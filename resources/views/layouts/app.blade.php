@@ -38,7 +38,8 @@
                     <i class="bi bi-tools me-2"></i> Service Tracking
                 </a>
 
-                <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
+                <a href="/interactions"
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
                     <i class="bi bi-journal-text me-2"></i> Interaction Logs
                 </a>
             </div>

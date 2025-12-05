@@ -9,7 +9,8 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/login.js',
                 'resources/js/clients.js',
-                'resources/js/services.js'
+                'resources/js/services.js',
+                'resources/js/interactions.js',
             ],
             refresh: true,
         }),
