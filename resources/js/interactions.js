@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 3. PAGINATION (Standard) ---
+    // --- 3. PAGINATION ---
     function renderPagination(result) {
         const container = document.getElementById('paginationContainer');
         if(!container) return;
@@ -96,8 +96,87 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = `<li class="page-item ${!result.next_page_url ? 'disabled' : ''}"><button class="page-link" onclick="window.loadPage('${result.next_page_url}')">Next</button></li>`;
         container.innerHTML = prevBtn + nextBtn;
     }
+    
     window.loadPage = (url) => { if (url && url !== 'null') fetchLogs(url); };
 
-    // Jalankan
+    // --- 4. LOAD CLIENTS (Untuk Dropdown) ---
+    const clientSelect = document.getElementById('clientSelect');
+    const modalEl = document.getElementById('createLogModal');
+
+    if (modalEl && clientSelect) {
+        // Load data klien saat modal dibuka pertama kali
+        modalEl.addEventListener('show.bs.modal', async () => {
+            if (clientSelect.options.length > 1) return; // Sudah terisi, jangan load lagi
+
+            try {
+                const response = await fetch('/api/clients', { 
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                result.data.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    clientSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Gagal load klien', error);
+            }
+        });
+    }
+
+    // --- 5. SUBMIT FORM (UPLOAD FILE) ---
+    const createForm = document.getElementById('createLogForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const alertBox = document.getElementById('formAlertContainer');
+
+    if (createForm) {
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = 'Mengupload...';
+            alertBox.innerHTML = '';
+
+            // Gunakan FormData untuk menangani file
+            const formData = new FormData(createForm);
+
+            try {
+                const response = await fetch('/api/interactions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        // PENTING: Jangan set Content-Type header manual saat upload file!
+                        // Browser akan otomatis mengaturnya menjadi 'multipart/form-data' dengan boundary yang benar.
+                        'Accept': 'application/json' 
+                    },
+                    body: formData // Kirim objek FormData langsung (bukan JSON string)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    createForm.reset();
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    fetchLogs(); // Refresh tabel
+                    alert('Log berhasil disimpan!');
+                } else {
+                    if (result.message) {
+                        alertBox.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Gagal menyimpan data.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Simpan Log';
+            }
+        });
+    }
+
+    // Jalankan awal
     fetchLogs();
 });
