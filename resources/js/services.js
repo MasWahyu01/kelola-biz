@@ -94,6 +94,87 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = prevBtn + info + nextBtn;
     }
 
+    // --- 4. LOAD KLIEN UNTUK DROPDOWN ---
+    const clientSelect = document.getElementById('clientSelect');
+
+    async function loadClientOptions() {
+        try {
+            // Kita ambil data klien dari API yang sudah ada
+            const response = await fetch('/api/clients', { // Default page 1
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            // Bersihkan opsi lama (kecuali default)
+            clientSelect.innerHTML = '<option value="">-- Pilih Klien --</option>';
+
+            // Loop data klien dan buat option
+            result.data.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.name} (${client.type})`;
+                clientSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Gagal memuat list klien', error);
+        }
+    }
+
+    // Panggil fungsi ini saat modal dibuka (Event Bootstrap)
+    const modalEl = document.getElementById('createServiceModal');
+    modalEl.addEventListener('show.bs.modal', loadClientOptions);
+
+
+    // --- 5. SUBMIT FORM LAYANAN ---
+    const createForm = document.getElementById('createServiceForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const alertBox = document.getElementById('formAlertContainer');
+
+    createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = 'Menyimpan...';
+        alertBox.innerHTML = '';
+
+        const formData = new FormData(createForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/services', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Sukses
+                createForm.reset();
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                
+                fetchServices(); // Refresh tabel layanan
+                alert('Layanan berhasil dibuat!');
+            } else {
+                if (result.message) {
+                    alertBox.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error sistem.');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Simpan Layanan';
+        }
+    });
+
     window.loadPage = (url) => { if (url && url !== 'null') fetchServices(url); };
 
     // Jalankan awal

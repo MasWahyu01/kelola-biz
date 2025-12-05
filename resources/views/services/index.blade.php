@@ -36,9 +36,76 @@
     </div>
 
     <div class="modal fade" id="createServiceModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-body">Form soon...</div>
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Buat Layanan Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="createServiceForm">
+                    <div class="modal-body">
+                        <div id="formAlertContainer"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Klien <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="client_id" id="clientSelect" required>
+                                        <option value="">-- Pilih Klien --</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Layanan <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="service_name"
+                                        placeholder="Contoh: Audit Tahunan 2024" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">PIC (Penanggung Jawab) <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="pic" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Tgl Mulai <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" name="start_date" required>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Tgl Selesai (Est)</label>
+                                        <input type="date" class="form-control" name="end_date">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Prioritas</label>
+                                        <select class="form-select" name="priority">
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Status Awal</label>
+                                        <select class="form-select" name="status">
+                                            <option value="new">New</option>
+                                            <option value="in_progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi Tambahan</label>
+                                    <textarea class="form-control" name="description" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">Simpan Layanan</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
