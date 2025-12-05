@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 'cancelled': 'bg-secondary'
             };
 
-// ... (kode statusColors di atas) ...
             const row = `
                 <tr>
                     <td>${index + 1}</td>
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 3. PAGINATION (Copy logic dari clients.js atau buat global helper nanti) ---
+    // --- 3. PAGINATION ---
     function renderPagination(result) {
         const container = document.getElementById('paginationContainer');
         if(!container) return;
@@ -103,21 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = prevBtn + info + nextBtn;
     }
 
-    // --- 4. LOAD KLIEN UNTUK DROPDOWN ---
+    // --- 4. LOAD KLIEN UNTUK DROPDOWN CREATE ---
     const clientSelect = document.getElementById('clientSelect');
 
     async function loadClientOptions() {
         try {
-            // Kita ambil data klien dari API yang sudah ada
-            const response = await fetch('/api/clients', { // Default page 1
+            const response = await fetch('/api/clients', { 
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
             
-            // Bersihkan opsi lama (kecuali default)
             clientSelect.innerHTML = '<option value="">-- Pilih Klien --</option>';
 
-            // Loop data klien dan buat option
             result.data.forEach(client => {
                 const option = document.createElement('option');
                 option.value = client.id;
@@ -129,61 +125,198 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Panggil fungsi ini saat modal dibuka (Event Bootstrap)
     const modalEl = document.getElementById('createServiceModal');
-    modalEl.addEventListener('show.bs.modal', loadClientOptions);
+    if(modalEl) {
+        modalEl.addEventListener('show.bs.modal', loadClientOptions);
+    }
 
-
-    // --- 5. SUBMIT FORM LAYANAN ---
+    // --- 5. SUBMIT FORM CREATE LAYANAN ---
     const createForm = document.getElementById('createServiceForm');
     const saveBtn = document.getElementById('saveBtn');
     const alertBox = document.getElementById('formAlertContainer');
 
-    createForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = 'Menyimpan...';
-        alertBox.innerHTML = '';
+    if(createForm) {
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = 'Menyimpan...';
+            alertBox.innerHTML = '';
 
-        const formData = new FormData(createForm);
-        const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(createForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/services', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    createForm.reset();
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    
+                    fetchServices(); 
+                    alert('Layanan berhasil dibuat!');
+                } else {
+                    if (result.message) {
+                        alertBox.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error sistem.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Simpan Layanan';
+            }
+        });
+    }
+
+    // --- 6. LOGIKA EDIT LAYANAN ---
+    const editModalEl = document.getElementById('editServiceModal');
+    // Inisialisasi modal edit jika elemennya ada
+    let editModal = null;
+    if (editModalEl) {
+        editModal = new bootstrap.Modal(editModalEl);
+    }
+    
+    const editForm = document.getElementById('editServiceForm');
+    const editClientSelect = document.getElementById('editClientSelect');
+
+    // Helper: Load Klien khusus untuk Dropdown Edit
+    async function loadEditClientOptions(selectedClientId) {
+        try {
+            // Cek jika dropdown masih kosong (kecuali default), baru fetch ulang
+            if (editClientSelect.options.length <= 1) {
+                const response = await fetch('/api/clients', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await response.json();
+                
+                editClientSelect.innerHTML = '<option value="">-- Pilih Klien --</option>';
+                result.data.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.name} (${client.type})`;
+                    editClientSelect.appendChild(option);
+                });
+            }
+            // Set nilai terpilih
+            editClientSelect.value = selectedClientId;
+        } catch (error) {
+            console.error('Gagal load klien edit', error);
+        }
+    }
+
+    // Fungsi Buka Modal Edit (Global Scope)
+    window.openEditService = async (id) => {
+        try {
+            if(!editModal) return;
+            editForm.reset();
+            
+            // 1. Ambil Data Service
+            const response = await fetch(`/api/services/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const service = await response.json();
+
+            // 2. Isi Form (Mapping ID dari HTML editServiceModal)
+            document.getElementById('editServiceId').value = service.id;
+            document.getElementById('editServiceName').value = service.service_name;
+            document.getElementById('editPic').value = service.pic;
+            document.getElementById('editStartDate').value = service.start_date;
+            document.getElementById('editEndDate').value = service.end_date || '';
+            document.getElementById('editPriority').value = service.priority;
+            document.getElementById('editStatus').value = service.status;
+            document.getElementById('editDescription').value = service.description || '';
+
+            // 3. Load Dropdown Klien & Pilih yang sesuai
+            await loadEditClientOptions(service.client_id);
+
+            // 4. Tampilkan Modal
+            editModal.show();
+
+        } catch (error) {
+            console.error(error);
+            alert('Gagal memuat data layanan.');
+        }
+    };
+
+    // Listener Submit Update
+    if(editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editServiceId').value;
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true; 
+            btn.innerText = 'Menyimpan...';
+
+            const formData = new FormData(editForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`/api/services/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    editModal.hide();
+                    fetchServices(); // Refresh tabel
+                    alert('Layanan berhasil diperbarui!');
+                } else {
+                    const res = await response.json();
+                    alert(res.message || 'Gagal update data.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error sistem.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Update Perubahan';
+            }
+        });
+    }
+
+    // --- 7. LOGIKA HAPUS LAYANAN ---
+    window.deleteService = async (id) => {
+        if (!confirm('Yakin ingin menghapus layanan ini? Data yang dihapus tidak bisa dikembalikan.')) return;
 
         try {
-            const response = await fetch('/api/services', {
-                method: 'POST',
+            const response = await fetch(`/api/services/${id}`, {
+                method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
+                }
             });
 
-            const result = await response.json();
-
             if (response.ok) {
-                // Sukses
-                createForm.reset();
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-                
-                fetchServices(); // Refresh tabel layanan
-                alert('Layanan berhasil dibuat!');
+                alert('Layanan dihapus.');
+                fetchServices();
             } else {
-                if (result.message) {
-                    alertBox.innerHTML = `<div class="alert alert-danger p-2">${result.message}</div>`;
-                }
+                alert('Gagal menghapus layanan.');
             }
         } catch (error) {
             console.error(error);
             alert('Error sistem.');
-        } finally {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = 'Simpan Layanan';
         }
-    });
+    };
 
+    // Global Pagination Handler
     window.loadPage = (url) => { if (url && url !== 'null') fetchServices(url); };
 
     // Jalankan awal
