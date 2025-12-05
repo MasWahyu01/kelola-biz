@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'cancelled': 'bg-secondary'
             };
 
+// ... (kode statusColors di atas) ...
             const row = `
                 <tr>
                     <td>${index + 1}</td>
@@ -73,6 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>
                         <small class="d-block text-muted">Mulai: ${service.start_date}</small>
                         ${service.end_date ? `<small class="d-block text-muted">Selesai: ${service.end_date}</small>` : ''}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditService(${service.id})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteService(${service.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
