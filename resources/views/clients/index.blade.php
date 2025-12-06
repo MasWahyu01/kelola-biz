@@ -64,7 +64,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Tambah Klien Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button class="btn btn-primary btn-sm d-none restricted-btn" data-bs-toggle="modal"
+                        data-bs-target="#createClientModal">
+                        <i class="bi bi-plus-lg"></i> Tambah Klien
+                    </button>
                 </div>
                 <form id="createClientForm">
                     <div class="modal-body">

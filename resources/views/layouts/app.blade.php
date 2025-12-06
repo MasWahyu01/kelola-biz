@@ -13,6 +13,10 @@
             window.location.href = '/login';
         }
     </script>
+
+    <script>
+        window.userRole = "{{ auth()->user()->role ?? 'viewer' }}";
+    </script>
 </head>
 
 <body class="bg-light">

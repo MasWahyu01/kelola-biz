@@ -25,7 +25,7 @@
                         </tr>
                     </thead>
                     <tbody id="serviceTableBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -41,7 +41,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Buat Layanan Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button class="btn btn-primary btn-sm d-none restricted-btn" data-bs-toggle="modal"
+                        data-bs-target="#createClientModal">
+                        <i class="bi bi-plus-lg"></i> Buat Layanan
+                    </button>
                 </div>
                 <form id="createServiceForm">
                     <div class="modal-body">
@@ -120,7 +123,7 @@
                 </div>
                 <form id="editServiceForm">
                     <input type="hidden" id="editServiceId" name="id">
-                    
+
                     <div class="modal-body">
                         <div id="editFormAlertContainer"></div>
 
@@ -134,7 +137,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Nama Layanan</label>
-                                    <input type="text" class="form-control" id="editServiceName" name="service_name" required>
+                                    <input type="text" class="form-control" id="editServiceName" name="service_name"
+                                        required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">PIC</label>
@@ -145,7 +149,8 @@
                                 <div class="row">
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Tgl Mulai</label>
-                                        <input type="date" class="form-control" id="editStartDate" name="start_date" required>
+                                        <input type="date" class="form-control" id="editStartDate" name="start_date"
+                                            required>
                                     </div>
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Tgl Selesai</label>
@@ -174,7 +179,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Deskripsi</label>
-                                    <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                                    <textarea class="form-control" id="editDescription" name="description"
+                                        rows="3"></textarea>
                                 </div>
                             </div>
                         </div>
