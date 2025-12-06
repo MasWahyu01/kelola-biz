@@ -45,15 +45,73 @@ class InteractionController extends Controller
         // --- LOGIKA UPLOAD FILE ---
         if ($request->hasFile('attachment')) {
             // Simpan ke folder 'storage/app/public/attachments'
-            // Fungsi store() otomatis men-generate nama unik agar tidak bentrok
             $path = $request->file('attachment')->store('attachments', 'public');
-            $validated['attachment'] = $path; // Simpan path-nya ke array data
+            $validated['attachment'] = $path; 
         }
 
         $log = InteractionLog::create($validated);
 
         return response()->json(['message' => 'Log interaksi dicatat', 'data' => $log], 201);
     }
+
+    // ==========================================
+    // METHOD BARU DITAMBAHKAN DI SINI
+    // ==========================================
+
+    /**
+     * Tampilkan detail 1 log (Method ini yang dicari tombol Edit).
+     */
+    public function show($id)
+    {
+        $log = InteractionLog::find($id);
+
+        if (!$log) {
+            return response()->json(['message' => 'Log not found'], 404);
+        }
+
+        return response()->json($log);
+    }
+
+    /**
+     * Update log interaksi (Method ini yang dicari tombol Simpan di modal Edit).
+     */
+    public function update(Request $request, $id)
+    {
+        $log = InteractionLog::find($id);
+
+        if (!$log) {
+            return response()->json(['message' => 'Log not found'], 404);
+        }
+
+        // Validasi input (gunakan 'sometimes' agar tidak wajib diisi semua ulang)
+        $validated = $request->validate([
+            'client_id' => 'sometimes|required|exists:clients,id',
+            'type' => 'sometimes|required|in:call,email,meeting,whatsapp,other',
+            'notes' => 'sometimes|required|string',
+            'next_action' => 'nullable|string|max:255',
+            'due_date' => 'nullable|date',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:2048',
+        ]);
+
+        // Cek jika user mengupload file baru pengganti
+        if ($request->hasFile('attachment')) {
+            // 1. Hapus file lama fisik dari server (agar tidak menumpuk sampah)
+            if ($log->attachment) {
+                Storage::disk('public')->delete($log->attachment);
+            }
+            // 2. Simpan file baru
+            $path = $request->file('attachment')->store('attachments', 'public');
+            $validated['attachment'] = $path;
+        }
+
+        $log->update($validated);
+
+        return response()->json(['message' => 'Log updated', 'data' => $log]);
+    }
+
+    // ==========================================
+    // AKHIR METHOD BARU
+    // ==========================================
 
     /**
      * Hapus log & filenya.
