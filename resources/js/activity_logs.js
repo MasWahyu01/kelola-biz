@@ -71,8 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 3. SHOW DETAIL (JSON PARSER) ---
-    // Fungsi ini dipanggil tombol "Detail"
+// --- 3. SHOW DETAIL (FORMATTER PINTAR) ---
     const detailModalEl = document.getElementById('detailModal');
     const detailModal = new bootstrap.Modal(detailModalEl);
     const detailContent = document.getElementById('detailContent');
@@ -81,11 +80,68 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!properties) {
             detailContent.innerHTML = '<p class="text-muted">Tidak ada data properti tambahan.</p>';
         } else {
-            // Jika properties tersimpan sebagai string JSON, parse dulu
+            // 1. Parse JSON jika perlu
             const data = typeof properties === 'string' ? JSON.parse(properties) : properties;
             
-            // Format tampilan JSON agar rapi
-            detailContent.innerHTML = `<pre class="bg-light p-3 rounded border" style="max-height: 400px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>`;
+            let html = '';
+
+            // 2. Cek Tipe Data: Apakah ini Update (Ada 'old' dan 'new')?
+            if (data.old && data.new) {
+                // TAMPILAN PERBANDINGAN (BEFORE vs AFTER)
+                html += `
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="30%">Kolom</th>
+                                    <th width="35%" class="text-danger">Sebelum (Old)</th>
+                                    <th width="35%" class="text-success">Sesudah (New)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                // Loop hanya key yang ada di data baru
+                for (const key in data.new) {
+                    html += `
+                        <tr>
+                            <td class="fw-bold">${key}</td>
+                            <td class="text-muted">${data.old[key] || '-'}</td>
+                            <td class="fw-bold text-dark">${data.new[key]}</td>
+                        </tr>
+                    `;
+                }
+                html += '</tbody></table></div>';
+
+            } else {
+                // TAMPILAN LIST BIASA (CREATE / DELETE)
+                html += `
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="40%">Nama Kolom</th>
+                                    <th>Nilai Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                for (const [key, value] of Object.entries(data)) {
+                    // Abaikan kolom teknis seperti created_at/updated_at agar lebih bersih
+                    if (key === 'created_at' || key === 'updated_at' || key === 'id') continue;
+
+                    html += `
+                        <tr>
+                            <td class="fw-bold">${key}</td>
+                            <td>${value}</td>
+                        </tr>
+                    `;
+                }
+                html += '</tbody></table></div>';
+            }
+
+            detailContent.innerHTML = html;
         }
         detailModal.show();
     };
