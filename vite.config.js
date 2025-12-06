@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/clients.js',
                 'resources/js/services.js',
                 'resources/js/interactions.js',
+                'resources/js/dashboard.js',
             ],
             refresh: true,
         }),
