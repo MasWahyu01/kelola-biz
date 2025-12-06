@@ -39,8 +39,13 @@
                 </a>
 
                 <a href="/interactions"
-                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1">
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 {{ request()->is('interactions*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text me-2"></i> Interaction Logs
+                </a>
+
+                <a href="/activity-logs"
+                    class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-1 {{ request()->is('activity-logs*') ? 'active' : '' }}">
+                    <i class="bi bi-eye me-2"></i> Activity Logs
                 </a>
             </div>
         </div>

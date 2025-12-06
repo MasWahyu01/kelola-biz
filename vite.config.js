@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/services.js',
                 'resources/js/interactions.js',
                 'resources/js/dashboard.js',
+                'resources/js/activity_logs.js',
             ],
             refresh: true,
         }),
