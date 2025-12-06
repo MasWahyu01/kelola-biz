@@ -5,17 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate; // <--- 1. IMPORT FACADE GATE
 
 class ClientController extends Controller
 {
     /**
-     * Tampilkan semua data klien (dengan pagination dan filter pencarian).
+     * Tampilkan semua data klien (Aman untuk Viewer, tidak perlu Gate edit).
      */
     public function index(Request $request)
     {
         $query = Client::latest();
 
-        // Jika ada parameter pencarian (misal: /api/clients?search=budi)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -24,25 +24,25 @@ class ClientController extends Controller
             });
         }
 
-        // Tetap gunakan pagination (10 per halaman)
-        // Hasil pencarian akan otomatis ter-paginate juga
         $clients = $query->paginate(10);
         
         return response()->json($clients);
     }
 
     /**
-     * Simpan klien baru.
+     * Simpan klien baru (Hanya user dengan akses edit).
      */
     public function store(Request $request)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         // Validasi Sederhana
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
-            'type' => 'required|in:VIP,SME,Corporate', // Sesuai Enum di database
+            'type' => 'required|in:VIP,SME,Corporate',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -55,7 +55,7 @@ class ClientController extends Controller
     }
 
     /**
-     * Tampilkan detail 1 klien.
+     * Tampilkan detail 1 klien (Aman untuk Viewer).
      */
     public function show($id)
     {
@@ -69,10 +69,12 @@ class ClientController extends Controller
     }
 
     /**
-     * Update data klien.
+     * Update data klien (Hanya user dengan akses edit).
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $client = Client::find($id);
 
         if (!$client) {
@@ -81,7 +83,7 @@ class ClientController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:clients,email,' . $id, // Pengecualian ID sendiri
+            'email' => 'sometimes|required|email|unique:clients,email,' . $id,
             'phone' => 'nullable|string|max:20',
             'type' => 'sometimes|required|in:VIP,SME,Corporate',
             'status' => 'sometimes|required|in:active,inactive',
@@ -96,10 +98,12 @@ class ClientController extends Controller
     }
 
     /**
-     * Hapus klien.
+     * Hapus klien (Hanya user dengan akses edit).
      */
     public function destroy($id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $client = Client::find($id);
 
         if (!$client) {

@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate; // <--- 1. IMPORT FACADE GATE
 
 class ServiceController extends Controller
 {
     /**
-     * Tampilkan layanan (Bisa difilter per Klien).
+     * Tampilkan layanan (Aman untuk Viewer, tanpa Gate).
      */
     public function index(Request $request)
     {
@@ -28,10 +29,12 @@ class ServiceController extends Controller
     }
 
     /**
-     * Buat layanan baru.
+     * Buat layanan baru (Hanya user dengan akses edit).
      */
     public function store(Request $request)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id', // Pastikan kliennya ada
             'service_name' => 'required|string|max:255',
@@ -52,7 +55,7 @@ class ServiceController extends Controller
     }
 
     /**
-     * Tampilkan detail 1 layanan.
+     * Tampilkan detail 1 layanan (Aman untuk Viewer, tanpa Gate).
      */
     public function show($id)
     {
@@ -67,10 +70,12 @@ class ServiceController extends Controller
     }
 
     /**
-     * Update layanan.
+     * Update layanan (Hanya user dengan akses edit).
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $service = Service::find($id);
 
         if (!$service) {
@@ -96,10 +101,12 @@ class ServiceController extends Controller
     }
 
     /**
-     * Hapus layanan.
+     * Hapus layanan (Hanya user dengan akses edit).
      */
     public function destroy($id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $service = Service::find($id);
 
         if (!$service) {

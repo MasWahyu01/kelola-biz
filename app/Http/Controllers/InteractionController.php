@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\InteractionLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // <--- PENTING: Untuk manajemen file
+use Illuminate\Support\Facades\Storage; // Untuk manajemen file
+use Illuminate\Support\Facades\Gate;    // <--- 1. IMPORT FACADE GATE
 
 class InteractionController extends Controller
 {
     /**
-     * Tampilkan log interaksi (Filter per Client).
+     * Tampilkan log interaksi (Aman untuk Viewer, tanpa Gate).
      */
     public function index(Request $request)
     {
@@ -28,10 +29,12 @@ class InteractionController extends Controller
     }
 
     /**
-     * Simpan log baru (termasuk upload file).
+     * Simpan log baru (Hanya user dengan akses edit).
      */
     public function store(Request $request)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'type' => 'required|in:call,email,meeting,whatsapp,other',
@@ -54,12 +57,8 @@ class InteractionController extends Controller
         return response()->json(['message' => 'Log interaksi dicatat', 'data' => $log], 201);
     }
 
-    // ==========================================
-    // METHOD BARU DITAMBAHKAN DI SINI
-    // ==========================================
-
     /**
-     * Tampilkan detail 1 log (Method ini yang dicari tombol Edit).
+     * Tampilkan detail 1 log (Aman untuk Viewer, tanpa Gate).
      */
     public function show($id)
     {
@@ -73,10 +72,12 @@ class InteractionController extends Controller
     }
 
     /**
-     * Update log interaksi (Method ini yang dicari tombol Simpan di modal Edit).
+     * Update log interaksi (Hanya user dengan akses edit).
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $log = InteractionLog::find($id);
 
         if (!$log) {
@@ -109,15 +110,13 @@ class InteractionController extends Controller
         return response()->json(['message' => 'Log updated', 'data' => $log]);
     }
 
-    // ==========================================
-    // AKHIR METHOD BARU
-    // ==========================================
-
     /**
-     * Hapus log & filenya.
+     * Hapus log & filenya (Hanya user dengan akses edit).
      */
     public function destroy($id)
     {
+        Gate::authorize('can-edit'); // <--- SATPAM: Cek izin
+
         $log = InteractionLog::find($id);
 
         if (!$log) {
