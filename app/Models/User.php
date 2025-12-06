@@ -22,6 +22,7 @@ class User extends Authenticatable implements JWTSubject // <--- PENTING: Tambah
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**

@@ -8,20 +8,38 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Membuat User Super Admin
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@kelola.biz',
-            'password' => Hash::make('password123'), // Password aman terenkripsi
-            // Nanti kita akan tambahkan role di sini, untuk sekarang default dulu
-        ]);
+        // 1. Super Admin (Akses Penuh)
+        User::updateOrCreate(
+            ['email' => 'admin@kelola.biz'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password123'),
+                'role' => 'admin'
+            ]
+        );
+
+        // 2. Staff Operasional (Input Data)
+        User::updateOrCreate(
+            ['email' => 'staff@kelola.biz'],
+            [
+                'name' => 'Staff Operasional',
+                'password' => Hash::make('password123'),
+                'role' => 'staff'
+            ]
+        );
+
+        // 3. Viewer / Manager (Hanya Lihat)
+        User::updateOrCreate(
+            ['email' => 'manager@kelola.biz'],
+            [
+                'name' => 'Pak Manager',
+                'password' => Hash::make('password123'),
+                'role' => 'viewer'
+            ]
+        );
         
-        // Opsional: Feedback di terminal
-        $this->command->info('User Admin berhasil dibuat!');
+        $this->command->info('3 User (Admin, Staff, Viewer) siap digunakan!');
     }
 }
