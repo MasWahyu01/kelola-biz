@@ -29,12 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 2. RENDER TABLE ---
+// --- 2. RENDER TABLE ---
     function renderTable(logs) {
         tableBody.innerHTML = '';
 
         if (logs.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Belum ada riwayat interaksi.</td></tr>`;
+            // Perhatikan colspan jadi 7 karena ada kolom baru
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Belum ada riwayat interaksi.</td></tr>`;
             return;
         }
 
@@ -51,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Tombol Attachment (Jika ada file)
             let attachmentBtn = '-';
             if (log.attachment) {
-                // Kita gunakan URL storage publik
                 const fileUrl = `/storage/${log.attachment}`;
                 attachmentBtn = `<a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-paperclip"></i> Lihat File</a>`;
             }
@@ -80,6 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${log.notes}</td>
                     <td>${nextAction}</td>
                     <td>${attachmentBtn}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditLog(${log.id})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteLog(${log.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 </tr>
             `;
             tableBody.innerHTML += row;
