@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. FETCH LOGS ---
     async function fetchLogs(url = '/api/interactions') {
         try {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
             const response = await fetch(url, {
                 headers: { 
@@ -25,16 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Gagal memuat data.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Gagal memuat data.</td></tr>`;
         }
     }
 
-// --- 2. RENDER TABLE ---
+    // --- 2. RENDER TABLE ---
     function renderTable(logs) {
         tableBody.innerHTML = '';
 
         if (logs.length === 0) {
-            // Perhatikan colspan jadi 7 karena ada kolom baru
             tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Belum ada riwayat interaksi.</td></tr>`;
             return;
         }
@@ -65,6 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            const actionButtons = `
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="window.openEditLog(${log.id})" title="Edit">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="window.deleteLog(${log.id})" title="Hapus">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+
             const row = `
                 <tr>
                     <td>${index + 1}</td>
@@ -80,14 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${log.notes}</td>
                     <td>${nextAction}</td>
                     <td>${attachmentBtn}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditLog(${log.id})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteLog(${log.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
+                    <td>${actionButtons}</td> 
                 </tr>
             `;
             tableBody.innerHTML += row;
@@ -107,14 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.loadPage = (url) => { if (url && url !== 'null') fetchLogs(url); };
 
-    // --- 4. LOAD CLIENTS (Untuk Dropdown) ---
+    // --- 4. LOAD CLIENTS (Untuk Dropdown Create) ---
     const clientSelect = document.getElementById('clientSelect');
     const modalEl = document.getElementById('createLogModal');
 
     if (modalEl && clientSelect) {
-        // Load data klien saat modal dibuka pertama kali
         modalEl.addEventListener('show.bs.modal', async () => {
-            if (clientSelect.options.length > 1) return; // Sudah terisi, jangan load lagi
+            if (clientSelect.options.length > 1) return; 
 
             try {
                 const response = await fetch('/api/clients', { 
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. SUBMIT FORM (UPLOAD FILE) ---
+    // --- 5. SUBMIT FORM (CREATE - UPLOAD FILE) ---
     const createForm = document.getElementById('createLogForm');
     const saveBtn = document.getElementById('saveBtn');
     const alertBox = document.getElementById('formAlertContainer');
@@ -147,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
             saveBtn.innerHTML = 'Mengupload...';
             alertBox.innerHTML = '';
 
-            // Gunakan FormData untuk menangani file
             const formData = new FormData(createForm);
 
             try {
@@ -155,11 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        // PENTING: Jangan set Content-Type header manual saat upload file!
-                        // Browser akan otomatis mengaturnya menjadi 'multipart/form-data' dengan boundary yang benar.
                         'Accept': 'application/json' 
                     },
-                    body: formData // Kirim objek FormData langsung (bukan JSON string)
+                    body: formData 
                 });
 
                 const result = await response.json();
@@ -168,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     createForm.reset();
                     const modal = bootstrap.Modal.getInstance(modalEl);
                     modal.hide();
-                    fetchLogs(); // Refresh tabel
+                    fetchLogs(); 
                     alert('Log berhasil disimpan!');
                 } else {
                     if (result.message) {
@@ -184,6 +183,148 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- 6. LOGIKA EDIT INTERAKSI ---
+    const editModalEl = document.getElementById('editLogModal');
+    // Pastikan modal element ada sebelum inisialisasi Bootstrap Modal
+    let editModal;
+    if (editModalEl) {
+        editModal = new bootstrap.Modal(editModalEl);
+    }
+    
+    const editForm = document.getElementById('editLogForm');
+    const editClientSelect = document.getElementById('editClientSelect');
+
+    // Helper: Load Klien untuk Dropdown Edit
+    async function loadEditClientOptions(selectedId) {
+        if (!editClientSelect) return;
+        
+        if (editClientSelect.options.length <= 1) {
+            try {
+                const response = await fetch('/api/clients', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await response.json();
+                
+                // Reset dan isi ulang
+                editClientSelect.innerHTML = '<option value="">-- Pilih Klien --</option>';
+                result.data.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    editClientSelect.appendChild(option);
+                });
+            } catch (e) { console.error(e); }
+        }
+        editClientSelect.value = selectedId;
+    }
+
+    // Fungsi Buka Modal Edit (Diakses global via window)
+    window.openEditLog = async (id) => {
+        if (!editModal || !editForm) return;
+
+        try {
+            editForm.reset();
+            const attachmentInfo = document.getElementById('currentAttachment');
+            if(attachmentInfo) attachmentInfo.innerHTML = ''; 
+
+            const response = await fetch(`/api/interactions/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const log = await response.json();
+
+            // Isi Form
+            document.getElementById('editLogId').value = log.id;
+            document.getElementById('editType').value = log.type;
+            document.getElementById('editNotes').value = log.notes;
+            
+            const nextActionEl = document.getElementById('editNextAction');
+            if(nextActionEl) nextActionEl.value = log.next_action || '';
+            
+            const dueDateEl = document.getElementById('editDueDate');
+            if(dueDateEl) dueDateEl.value = log.due_date || '';
+            
+            // Info File Lama (Jika ada)
+            if (log.attachment && attachmentInfo) {
+                attachmentInfo.innerHTML = 
+                    `<small class="text-success"><i class="bi bi-file-earmark-check"></i> File saat ini: <a href="/storage/${log.attachment}" target="_blank">Lihat File</a> (Upload baru untuk mengganti)</small>`;
+            }
+
+            // Load Klien
+            await loadEditClientOptions(log.client_id);
+            
+            editModal.show();
+        } catch (error) {
+            console.error(error);
+            alert('Gagal memuat data log.');
+        }
+    };
+
+    // Listener Update (PENTING: Gunakan FormData untuk File Upload)
+    if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editLogId').value;
+            const btn = document.getElementById('updateLogBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+
+            const formData = new FormData(editForm);
+            // Laravel butuh method spoofing untuk file upload via PUT
+            formData.append('_method', 'PUT');
+
+            try {
+                const response = await fetch(`/api/interactions/${id}`, {
+                    method: 'POST', // Gunakan POST + _method:PUT
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    editModal.hide();
+                    fetchLogs();
+                    alert('Log berhasil diperbarui!');
+                } else {
+                    alert(result.message || 'Gagal update log.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error sistem.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Update Log';
+            }
+        });
+    }
+
+    // --- 7. LOGIKA HAPUS LOG ---
+    window.deleteLog = async (id) => {
+        if (!confirm('Yakin ingin menghapus log interaksi ini? File lampiran juga akan dihapus.')) return;
+
+        try {
+            const response = await fetch(`/api/interactions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('Log dihapus.');
+                fetchLogs();
+            } else {
+                alert('Gagal menghapus log.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error sistem.');
+        }
+    };
 
     // Jalankan awal
     fetchLogs();
