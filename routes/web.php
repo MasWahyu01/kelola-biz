@@ -7,6 +7,8 @@ use App\Http\Controllers\DashboardController; // Import controller ditambahkan
 Route::view('/login', 'auth.login')->name('login');
 Route::view('/services', 'services.index')->name('services.index');
 Route::view('/interactions', 'interactions.index')->name('interactions.index');
+Route::view('/activity-logs', 'activity_logs.index')->name('activity_logs.index');
+
 // Rute Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::view('/clients', 'clients.index')->name('clients.index');
