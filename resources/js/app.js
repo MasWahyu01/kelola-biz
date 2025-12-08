@@ -1,7 +1,7 @@
 import './bootstrap';
 
-// --- PERUBAHAN DI SINI ---
-// Kita import semua fitur Bootstrap dan simpan ke variabel global 'window'
+// --- SETUP BOOTSTRAP GLOBAL ---
+// Import semua fitur Bootstrap dan simpan ke variabel global 'window'
 import * as bootstrap from 'bootstrap';
 window.bootstrap = bootstrap;
 // -------------------------
@@ -20,20 +20,53 @@ if (token) {
     })
     .then(response => response.json())
     .then(user => {
-        // Simpan data user ke variabel global agar bisa diakses script lain (clients.js, dll)
+        // 1. Simpan data user ke variabel global
         window.currentUser = user;
 
-        // --- PROTEKSI 1: SIDEBAR MENU ---
-        // Cari elemen yang khusus Admin
+        // 2. Update Nama di Navbar (Ganti tulisan "User Admin" jadi Nama User)
+        const navName = document.getElementById('navUserName');
+        // Jika kamu ingin tulisannya tetap "User" saja, ganti user.name menjadi "User"
+        // Tapi lebih keren kalau muncul nama aslinya kan? :)
+        if (navName) navName.innerText = user.name; 
+
+        // 3. Proteksi Sidebar (Hapus menu Admin jika bukan admin)
         const adminMenus = document.querySelectorAll('.admin-only');
-        
-        // Jika bukan admin, hapus elemen tersebut dari layar
         if (user.role !== 'admin') {
             adminMenus.forEach(el => el.remove());
         }
+        
+        // 4. Proteksi Tombol Operasional (Hapus tombol edit/delete jika Viewer)
+        // Logika: Jika user BUKAN viewer, maka tombol .restricted-btn dimunculkan
+        // (Asumsi di HTML tombol ini default-nya class="d-none")
+        if (user.role !== 'viewer') {
+            const restrictedBtns = document.querySelectorAll('.restricted-btn');
+            restrictedBtns.forEach(el => el.classList.remove('d-none'));
+        }
 
-        // Trigger event custom untuk memberitahu script lain bahwa data user sudah siap
+        // 5. Logika Tombol Profile (POPUP MODAL)
+        const btnProfile = document.getElementById('btnProfile');
+        if (btnProfile) {
+            btnProfile.addEventListener('click', (e) => {
+                e.preventDefault(); // Mencegah link reload halaman
+                
+                // Isi data ke dalam span di modal
+                document.getElementById('profileName').innerText = user.name;
+                document.getElementById('profileEmail').innerText = user.email;
+                document.getElementById('profileRole').innerText = user.role.toUpperCase();
+
+                // Tampilkan modal menggunakan Bootstrap API
+                const profileModalElement = document.getElementById('profileModal');
+                const profileModal = new window.bootstrap.Modal(profileModalElement);
+                profileModal.show();
+            });
+        }
+
+        // Trigger event bahwa user sudah siap
         window.dispatchEvent(new Event('user-ready'));
     })
-    .catch(error => console.error('Gagal load user:', error));
+    .catch(error => {
+        console.error('Gagal load user:', error);
+        // Opsional: Redirect ke login jika token tidak valid
+        // window.location.href = '/login'; 
+    });
 }

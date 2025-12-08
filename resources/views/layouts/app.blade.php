@@ -62,10 +62,10 @@
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown"
                             data-bs-toggle="dropdown">
-                            User Admin
-                        </button>
+                            <i class="bi bi-person-circle me-1"></i>
+                            <span id="navUserName">Loading...</span> </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><button class="dropdown-item" id="btnProfile">Profile</button></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -87,6 +87,28 @@
             window.location.href = '/login';
         });
     </script>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Profil Saya</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle display-1 text-secondary"></i>
+                    </div>
+                    <h5 class="fw-bold" id="profileName">-</h5>
+                    <p class="text-muted mb-2" id="profileEmail">-</p>
+                    <span class="badge bg-info text-dark text-uppercase" id="profileRole">-</span>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
