@@ -20,6 +20,7 @@ if (token) {
     })
     .then(response => response.json())
     .then(user => {
+        console.log('User Data Loaded:', user);
         // 1. Simpan data user ke variabel global
         window.currentUser = user;
 
