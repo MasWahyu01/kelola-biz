@@ -16,7 +16,7 @@
                         placeholder="Cari nama atau email...">
                 </div>
 
-                <button class="btn btn-primary btn-sm text-nowrap" data-bs-toggle="modal"
+                <button class="btn btn-primary btn-sm text-nowrap d-none restricted-btn" data-bs-toggle="modal"
                     data-bs-target="#createClientModal">
                     <i class="bi bi-plus-lg"></i> Tambah Klien
                 </button>
@@ -64,6 +64,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Tambah Klien Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="createClientForm">
                     <div class="modal-body">

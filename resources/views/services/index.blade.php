@@ -6,7 +6,8 @@
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="m-0 fw-bold text-primary">Daftar Layanan</h5>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createServiceModal">
+            <button class="btn btn-primary btn-sm d-none restricted-btn" data-bs-toggle="modal"
+                data-bs-target="#createServiceModal">
                 <i class="bi bi-plus-lg"></i> Buat Layanan
             </button>
         </div>
@@ -40,7 +41,8 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Buat Layanan Baru</h5>
+                    <h5 class="modal-title fw-bold">Tambah Layanan Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="createServiceForm">
                     <div class="modal-body">

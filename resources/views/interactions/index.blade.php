@@ -6,7 +6,8 @@
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="m-0 fw-bold text-primary">Riwayat Interaksi</h5>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createLogModal">
+            <button class="btn btn-primary btn-sm d-none restricted-btn" data-bs-toggle="modal"
+                data-bs-target="#createLogModal">
                 <i class="bi bi-plus-lg"></i> Catat Log Baru
             </button>
         </div>
@@ -108,7 +109,8 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Edit Interaksi</h5>
+                    <h5 class="modal-title fw-bold">Catat Interaksi Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="editLogForm">
                     <input type="hidden" id="editLogId" name="id">
