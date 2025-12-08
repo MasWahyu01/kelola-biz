@@ -109,7 +109,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Edit Interaksi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="editLogForm">
                     <input type="hidden" id="editLogId" name="id">
