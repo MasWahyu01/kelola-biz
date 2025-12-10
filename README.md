@@ -25,7 +25,7 @@ Berikut adalah tampilan antarmuka aplikasi.
 
 ### 1. Halaman Login
 Halaman masuk yang aman dengan validasi JWT.
-![Halaman Login](GANTI_DENGAN_LINK_GAMBAR_LOGIN_ANDA.jpg)
+![Halaman Login]https://drive.google.com/file/d/1l-Oakov2CnDaux09ZC7vedeIHoAb5Es2/view?usp=drive_link
 
 ### 2. Dashboard Utama
 Menampilkan statistik ringkas, grafik komposisi status layanan *(Pie Chart)*, dan tren layanan baru bulanan *(Bar Chart)*.
