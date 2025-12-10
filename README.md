@@ -41,7 +41,7 @@ Memantau status pengerjaan layanan *(New, In Progress, Completed)* lengkap denga
 
 ### 5. Interaction Logs (Riwayat Komunikasi)
 Mencatat hasil meeting atau telepon dengan klien. Mendukung **Upload Bukti Foto/Dokumen**.
-![Halaman Interaction Logs]([GANTI_DENGAN_LINK_GAMBAR_LOG_INTERAKSI_ANDA.jpg](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211131.png))
+![Halaman Interaction Logs](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211131.png)
 
 ### 6. Audit Trail / Activity Logs (Super Admin Only)
 Fitur "CCTV" sistem yang mencatat siapa melakukan apa, lengkap dengan detail perubahan data *(Before vs After)*.
