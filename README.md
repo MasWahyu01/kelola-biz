@@ -81,5 +81,5 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer Anda:
 
 **1. Clone Repository**
 ```bash
-git clone [https://github.com/username-anda/kelola-biz.git](https://github.com/username-anda/kelola-biz.git)
+git clone [https://github.com/username-anda/kelola-biz.git](https://github.com/MasWahyu01/kelola-biz.git)
 cd kelola-biz
