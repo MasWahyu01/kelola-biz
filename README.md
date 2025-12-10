@@ -29,23 +29,23 @@ Halaman masuk yang aman dengan validasi JWT.
 
 ### 2. Dashboard Utama
 Menampilkan statistik ringkas, grafik komposisi status layanan *(Pie Chart)*, dan tren layanan baru bulanan *(Bar Chart)*.
-![Dashboard Admin](GANTI_DENGAN_LINK_GAMBAR_DASHBOARD_ANDA.jpg)
+![Dashboard Admin](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20210941.png)
 
 ### 3. Manajemen Klien (Admin/Staff)
 Fitur CRUD lengkap untuk mengelola data perusahaan klien dengan fitur pencarian *real-time*.
-![Halaman Manajemen Klien](GANTI_DENGAN_LINK_GAMBAR_TABEL_KLIEN_ANDA.jpg)
+![Halaman Manajemen Klien](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211030.png)
 
 ### 4. Service Tracking (Pelacakan Layanan)
 Memantau status pengerjaan layanan *(New, In Progress, Completed)* lengkap dengan prioritas dan timeline.
-![Halaman Service Tracking](GANTI_DENGAN_LINK_GAMBAR_TABEL_LAYANAN_ANDA.jpg)
+![Halaman Service Tracking](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211103.png)
 
 ### 5. Interaction Logs (Riwayat Komunikasi)
 Mencatat hasil meeting atau telepon dengan klien. Mendukung **Upload Bukti Foto/Dokumen**.
-![Halaman Interaction Logs](GANTI_DENGAN_LINK_GAMBAR_LOG_INTERAKSI_ANDA.jpg)
+![Halaman Interaction Logs]([GANTI_DENGAN_LINK_GAMBAR_LOG_INTERAKSI_ANDA.jpg](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211131.png))
 
 ### 6. Audit Trail / Activity Logs (Super Admin Only)
 Fitur "CCTV" sistem yang mencatat siapa melakukan apa, lengkap dengan detail perubahan data *(Before vs After)*.
-![Halaman Audit Trail](GANTI_DENGAN_LINK_GAMBAR_AUDIT_LOG_ANDA.jpg)
+![Halaman Audit Trail](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211207.png)
 
 ---
 
@@ -58,7 +58,7 @@ Sistem ini memiliki proteksi **RBAC**. Jika user login sebagai **Manager**, apli
 * Menu **Activity Logs** di sidebar dihilangkan.
 
 **Bukti Tampilan Manager:**
-![Tampilan Klien Mode Manager](GANTI_DENGAN_LINK_GAMBAR_KLIEN_MODE_MANAGER_ANDA.jpg)
+![Tampilan Klien Mode Manager](https://github.com/MasWahyu01/kelola-biz/blob/master/HasilGambar/Screenshot%202025-12-10%20211755.png)
 
 ---
 
